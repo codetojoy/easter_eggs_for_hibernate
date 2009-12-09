@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<project name="Eggs_for_Hibernate" default="run" basedir=".">
+    
+	<property file="build.properties"/>
+	
+	<!-- this file must include:
+		db.driver=org.postgresql.Driver
+		jdbc.url.prefix=jdbc:postgresql://localhost:PORT/
+		db.user=USER
+		db.password=PASSWORD
+		db.name=sandbox	
+	-->
+	<property file="db.properties"/>
+	
+    <!-- Hibernate Tasks and Targets -->
+    <path id="hibernate.classpath">
+        <pathelement path="${classes.dir}"/>
+        <pathelement path="${config.dir}"/>
+
+        <pathelement path="${postgres.driver.jar}"/>
+
+        <pathelement path="${hib.tools.jar}"/>
+        <pathelement path="${hib.jar}"/>
+        <pathelement path="${jta.jar}"/>
+        <pathelement path="${antlr.jar}"/>
+        <pathelement path="${commons.logging.jar}"/>
+        <pathelement path="${commons.collections.jar}"/>
+        <pathelement path="${freemarker.jar}"/>
+        <pathelement path="${javassist.jar}"/>
+        <pathelement path="${dom4j.jar}"/>
+        <pathelement path="${slf4j.api.jar}"/>
+        <pathelement path="${slf4j.simple.jar}"/>
+    </path>
+    
+    <taskdef name="hibernatetool" classname="org.hibernate.tool.ant.HibernateToolTask" classpathref="hibernate.classpath"/>
+        
+    <target name="init">
+        <mkdir dir="${classes.dir}"/>
+		<fail message="Please create db.properties file! See FAQ">
+			<condition> <not><isset property="db.user"/></not> </condition>
+		</fail>
+		<fail message="Please create db.properties file! See FAQ">
+			<condition> <not><isset property="db.password"/></not> </condition>
+		</fail>
+		<fail message="Please create db.properties file! See FAQ">
+			<condition> <not><isset property="db.name"/></not> </condition>
+		</fail>
+		<fail message="Please create db.properties file! See FAQ">
+			<condition> <not><isset property="db.driver"/></not> </condition>
+		</fail>
+		<fail message="Please create db.properties file! See FAQ">
+			<condition> <not><isset property="jdbc.url.prefix"/></not> </condition>
+		</fail>
+    </target>
+        
+    <target name="build_db" description="creates database tables" >
+		<!-- Drop the database --> 
+		<antcall target="execute_sql">
+			<param name="param.db"      value="postgres"/>
+			<param name="param.file"    value="${sql.dir}/drop-sandbox.sql"/>
+	    	<param name="param.onerror" value="continue"/>
+		</antcall>	
+		<!-- Create the database -->
+		<antcall target="execute_sql">
+			<param name="param.db"   value="postgres"/>
+			<param name="param.file" value="${sql.dir}/create-sandbox.sql"/>
+		</antcall>	        
+ 		<!-- create tables from Hibernate --> 
+        <antcall target="execute_sql">
+            <param name="param.db"   value="${db.name}"/>
+            <param name="param.file" value="${sql.dir}/hibernate-generated-ddl.sql"/>
+        </antcall>        
+    </target>
+    
+    <target name="populate_db" description="populates the database" >
+        <antcall target="execute_sql">
+            <param name="param.db"   value="${db.name}"/>
+            <param name="param.file" value="${sql.dir}/populate.sql"/>
+        </antcall>    
+    </target>
+    
+    <target name="gen_ddl" description="generate ddl sql" >
+        <hibernatetool destdir="${sql.dir}">
+            <configuration configurationfile="${hib.config.file}"/>
+            <hbm2ddl drop="false" create="true" export="false" update="false"
+                    outputfilename="${hib.gen.ddl}" haltonerror="true"/>
+        </hibernatetool>        
+    </target>
+    
+    <target name="compile" depends="init" description="compiles common, server, client " >
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="hibernate.classpath"/>    
+    </target>
+    
+    <target name="clean" description="cleans all class files" >
+        <delete dir="${classes.dir}"/>
+    </target>
+    
+    <target name="run" depends="compile" description="runs the server" >
+        <java classname="${main.app}" 
+                classpathref="hibernate.classpath" fork="true">
+        </java>
+    </target>  
+
+    <target name="all" depends="clean, compile, gen_ddl, build_db, populate_db">
+        <java classname="net.codetojoy.hibernate.example.ServerImpl" 
+                classpathref="server.run.classpath" fork="true">
+        </java>
+    </target>  
+
+    <target name="help" description="gives natural order of targets" >
+        <echo message="1. clean        cleans all class files"/>
+        <echo message="2. compile      compiles Java"/>
+        <echo message="3. gen_ddl      generate ddl sql"/>
+        <echo message="4. build_db     creates database tables"/>
+        <echo message="5. populate_db  populates the database"/>
+        <echo message="6. run          runs the Java main class"/>    
+    </target>  
+    
+	<!-- ======================================================================= -->
+	<!-- run arbitrary SQL                                                
+    -->
+	<!-- ======================================================================= -->
+	<target name="execute_sql">
+	    <fail unless="param.file" message="param.file must indicate the SQL file to run"/>
+	    <fail unless="param.db"   message="param.db must indicate the db"/>
+        <!-- default value for optional parameter -->
+	    <property name="param.onerror" value="abort"/>
+	
+		<sql driver="${db.driver}" url="${jdbc.url.prefix}${param.db}"
+		    userid="${db.user}" password="${db.password}" autocommit="true"
+		    onerror="${param.onerror}" src="${param.file}">
+		    <classpath refid="hibernate.classpath"/>
+		</sql>
+	</target>
+  
+</project>

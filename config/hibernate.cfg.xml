@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+<session-factory>
+        <property name="connection.url">jdbc:postgresql://localhost:6150/sandbox</property>
+        <property name="connection.username">postgres</property>
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        <property name="connection.password">ttosbtpg</property>
+        <property name="transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+    <!--  thread is the short name for
+      org.hibernate.context.ThreadLocalSessionContext
+      and let Hibernate bind the session automatically to the thread
+    -->
+    <property name="current_session_context_class">thread</property>
+    <!-- this will show us all sql statements -->
+    <property name="hibernate.show_sql">false</property>
+        <!-- mapping files -->
+        <mapping file="./config/MyMap.hbm.xml" />
+</session-factory>
+
+</hibernate-configuration>
