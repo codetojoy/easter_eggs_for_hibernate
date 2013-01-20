@@ -1,4 +1,3 @@
-
 *** Introduction
 
 Jan 2013: soon to be converted to a Gradle build
@@ -26,5 +25,5 @@ For example:
 3. gen_ddl      generate ddl sql
 4. build_db     creates database tables
 5. populate_db  populates the database (use ~/sql/populate.sql)
-6. run          runs the Java main class (see ServerImpl.java)
+6. run          runs the Java main class (see Main.java in src)
 
