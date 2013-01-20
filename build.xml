@@ -2,17 +2,17 @@
 
 <project name="Eggs_for_Hibernate" default="run" basedir=".">
     
-	<property file="build.properties"/>
-	
-	<!-- this file must include:
-		db.driver=org.postgresql.Driver
-		jdbc.url.prefix=jdbc:postgresql://localhost:PORT/
-		db.user=USER
-		db.password=PASSWORD
-		db.name=sandbox	
-	-->
-	<property file="db.properties"/>
-	
+    <property file="build.properties"/>
+    
+    <!-- this file must include:
+        db.driver=org.postgresql.Driver
+        jdbc.url.prefix=jdbc:postgresql://localhost:PORT/
+        db.user=USER
+        db.password=PASSWORD
+        db.name=sandbox    
+    -->
+    <property file="db.properties"/>
+    
     <!-- Hibernate Tasks and Targets -->
     <path id="hibernate.classpath">
         <pathelement path="${classes.dir}"/>
@@ -37,36 +37,36 @@
         
     <target name="init">
         <mkdir dir="${classes.dir}"/>
-		<fail message="Please create db.properties file! See FAQ">
-			<condition> <not><isset property="db.user"/></not> </condition>
-		</fail>
-		<fail message="Please create db.properties file! See FAQ">
-			<condition> <not><isset property="db.password"/></not> </condition>
-		</fail>
-		<fail message="Please create db.properties file! See FAQ">
-			<condition> <not><isset property="db.name"/></not> </condition>
-		</fail>
-		<fail message="Please create db.properties file! See FAQ">
-			<condition> <not><isset property="db.driver"/></not> </condition>
-		</fail>
-		<fail message="Please create db.properties file! See FAQ">
-			<condition> <not><isset property="jdbc.url.prefix"/></not> </condition>
-		</fail>
+        <fail message="Please create db.properties file! See FAQ">
+            <condition> <not><isset property="db.user"/></not> </condition>
+        </fail>
+        <fail message="Please create db.properties file! See FAQ">
+            <condition> <not><isset property="db.password"/></not> </condition>
+        </fail>
+        <fail message="Please create db.properties file! See FAQ">
+            <condition> <not><isset property="db.name"/></not> </condition>
+        </fail>
+        <fail message="Please create db.properties file! See FAQ">
+            <condition> <not><isset property="db.driver"/></not> </condition>
+        </fail>
+        <fail message="Please create db.properties file! See FAQ">
+            <condition> <not><isset property="jdbc.url.prefix"/></not> </condition>
+        </fail>
     </target>
         
     <target name="build_db" description="creates database tables" >
-		<!-- Drop the database --> 
-		<antcall target="execute_sql">
-			<param name="param.db"      value="postgres"/>
-			<param name="param.file"    value="${sql.dir}/drop-sandbox.sql"/>
-	    	<param name="param.onerror" value="continue"/>
-		</antcall>	
-		<!-- Create the database -->
-		<antcall target="execute_sql">
-			<param name="param.db"   value="postgres"/>
-			<param name="param.file" value="${sql.dir}/create-sandbox.sql"/>
-		</antcall>	        
- 		<!-- create tables from Hibernate --> 
+        <!-- Drop the database --> 
+        <antcall target="execute_sql">
+            <param name="param.db"      value="postgres"/>
+            <param name="param.file"    value="${sql.dir}/drop-sandbox.sql"/>
+            <param name="param.onerror" value="continue"/>
+        </antcall>    
+        <!-- Create the database -->
+        <antcall target="execute_sql">
+            <param name="param.db"   value="postgres"/>
+            <param name="param.file" value="${sql.dir}/create-sandbox.sql"/>
+        </antcall>            
+         <!-- create tables from Hibernate --> 
         <antcall target="execute_sql">
             <param name="param.db"   value="${db.name}"/>
             <param name="param.file" value="${sql.dir}/hibernate-generated-ddl.sql"/>
@@ -117,21 +117,21 @@
         <echo message="6. run          runs the Java main class"/>    
     </target>  
     
-	<!-- ======================================================================= -->
-	<!-- run arbitrary SQL                                                
+    <!-- ======================================================================= -->
+    <!-- run arbitrary SQL                                                
     -->
-	<!-- ======================================================================= -->
-	<target name="execute_sql">
-	    <fail unless="param.file" message="param.file must indicate the SQL file to run"/>
-	    <fail unless="param.db"   message="param.db must indicate the db"/>
+    <!-- ======================================================================= -->
+    <target name="execute_sql">
+        <fail unless="param.file" message="param.file must indicate the SQL file to run"/>
+        <fail unless="param.db"   message="param.db must indicate the db"/>
         <!-- default value for optional parameter -->
-	    <property name="param.onerror" value="abort"/>
-	
-		<sql driver="${db.driver}" url="${jdbc.url.prefix}${param.db}"
-		    userid="${db.user}" password="${db.password}" autocommit="true"
-		    onerror="${param.onerror}" src="${param.file}">
-		    <classpath refid="hibernate.classpath"/>
-		</sql>
-	</target>
+        <property name="param.onerror" value="abort"/>
+    
+        <sql driver="${db.driver}" url="${jdbc.url.prefix}${param.db}"
+            userid="${db.user}" password="${db.password}" autocommit="true"
+            onerror="${param.onerror}" src="${param.file}">
+            <classpath refid="hibernate.classpath"/>
+        </sql>
+    </target>
   
 </project>

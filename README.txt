@@ -1,6 +1,8 @@
 
 *** Introduction
 
+Jan 2013: soon to be converted to a Gradle build
+ 
 Easter's Eggs. 
 
 This does not refer to the secret-codes/tricks in video games! 
